@@ -9,32 +9,32 @@ jobs:
       - uses: actions/checkout@v4
       - name: Debug Client Payload
         run: |
-          echo "Full client-payload: ${{ toJSON(github.event.client-payload) }}"
-          echo "Module: ${{ github.event.client-payload.module }}"
-          echo "Token: ${{ github.event.client-payload.module_repo_token }}"
+          echo "Full client_payload: ${{ toJSON(github.event.client_payload) }}"
+          echo "Module: ${{ github.event.client_payload.module }}"
+          echo "Token: ${{ github.event.client_payload.module_repo_token }}"
       - name: Update Test Status
         run: |
           # Update README with test status
           echo "# Test Status" > TEST_STATUS.md
-          echo "Test Status: ${{ github.event.client-payload.test_status }}" >> TEST_STATUS.md
-          echo "Main Pipeline Run: ${{ github.event.client-payload.results_url }}" >> TEST_STATUS.md
-          echo "Commit: ${{ github.event.client-payload.commit }}" >> TEST_STATUS.md
+          echo "Test Status: ${{ github.event.client_payload.test_status }}" >> TEST_STATUS.md
+          echo "Main Pipeline Run: ${{ github.event.client_payload.results_url }}" >> TEST_STATUS.md
+          echo "Commit: ${{ github.event.client_payload.commit }}" >> TEST_STATUS.md
           git config user.name "GitHub Actions"
           git config user.email "actions@github.com"
           git add TEST_STATUS.md
-          git commit -m "Update test status for commit ${{ github.event.client-payload.commit }}"
+          git commit -m "Update test status for commit ${{ github.event.client_payload.commit }}"
           # Clear any cached credentials
           git config --unset-all http.https://github.com/.extraheader
           # Configure Git to use MODULE_REPO_TOKEN
-          git remote set-url origin https://x:${{ github.event.client-payload.module_repo_token }}@github.com/yiptsunho/demo_module_repository_for_CICD.git
+          git remote set-url origin https://x:${{ github.event.client_payload.module_repo_token }}@github.com/yiptsunho/demo_module_repository_for_CICD.git
           git push
       - name: Comment on Pull Request
-        if: github.event.client-payload.commit
+        if: github.event.client_payload.commit
         uses: actions/github-script@v6
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            const commit = "${{ github.event.client-payload.commit }}";
+            const commit = "${{ github.event.client_payload.commit }}";
             const { data: pulls } = await github.rest.pulls.list({
               owner: context.repo.owner,
               repo: context.repo.repo,
@@ -46,6 +46,6 @@ jobs:
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 issue_number: pr.number,
-                body: `Test Status: ${{ github.event.client-payload.test_status }}\nMain Pipeline Run: ${{ github.event.client-payload.results_url }}`
+                body: `Test Status: ${{ github.event.client_payload.test_status }}\nMain Pipeline Run: ${{ github.event.client_payload.results_url }}`
               });
             }
