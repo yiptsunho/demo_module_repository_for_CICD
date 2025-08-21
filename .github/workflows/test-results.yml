@@ -18,9 +18,9 @@ jobs:
           git config user.email "actions@github.com"
           git add TEST_STATUS.md
           git commit -m "Update test status for commit ${{ github.event.client-payload.commit }}"
+          # Configure Git to use MODULE_REPO_TOKEN for push
+          git remote set-url origin https://x:${{ github.event.client-payload.module_repo_token }}@github.com/yiptsunho/${{ github.event.client-payload.module }}.git
           git push
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Comment on Pull Request
         if: github.event.client-payload.commit
         uses: actions/github-script@v6
