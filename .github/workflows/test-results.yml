@@ -1,0 +1,44 @@
+name: Test Result Notification
+on:
+  repository_dispatch:
+    types: [test-results]
+jobs:
+  update-test-status:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Update Test Status
+        run: |
+          # Update README with test status
+          echo "# Test Status" > TEST_STATUS.md
+          echo "Test Status: ${{ github.event.client-payload.test_status }}" >> TEST_STATUS.md
+          echo "Main Pipeline Run: ${{ github.event.client-payload.results_url }}" >> TEST_STATUS.md
+          echo "Commit: ${{ github.event.client-payload.commit }}" >> TEST_STATUS.md
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          git add TEST_STATUS.md
+          git commit -m "Update test status for commit ${{ github.event.client-payload.commit }}"
+          git push
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Comment on Pull Request
+        if: github.event.client-payload.commit
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const commit = "${{ github.event.client-payload.commit }}";
+            const { data: pulls } = await github.rest.pulls.list({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open'
+            });
+            const pr = pulls.find(p => p.head.sha === commit);
+            if (pr) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: pr.number,
+                body: `Test Status: ${{ github.event.client-payload.test_status }}\nMain Pipeline Run: ${{ github.event.client-payload.results_url }}`
+              });
+            }
