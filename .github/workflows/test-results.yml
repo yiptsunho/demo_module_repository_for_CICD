@@ -7,22 +7,49 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Debug Client Payload
+      - name: Update Test Status Files
         run: |
-          echo "Full client_payload: ${{ toJSON(github.event.client_payload) }}"
-          echo "Module: ${{ github.event.client_payload.module }}"
-          echo "Token: ${{ github.event.client_payload.module_repo_token }}"
-      - name: Update Test Status
-        run: |
-          # Update README with test status
-          echo "# Test Status" > TEST_STATUS.md
-          echo "Test Status: ${{ github.event.client_payload.test_status }}" >> TEST_STATUS.md
-          echo "Main Pipeline Run: ${{ github.event.client_payload.results_url }}" >> TEST_STATUS.md
-          echo "Commit: ${{ github.event.client_payload.commit }}" >> TEST_STATUS.md
+          # Prepare new test status entry
+          STATUS_EMOJI=$([[ "${{ github.event.client_payload.test_status }}" == "success" ]] && echo "✅ Success" || echo "❌ Failure")
+          STATUS_BADGE=$([[ "${{ github.event.client_payload.test_status }}" == "success" ]] && echo "![Test Status](https://img.shields.io/badge/Test%20Status-Success-green)" || echo "![Test Status](https://img.shields.io/badge/Test%20Status-Failure-red)")
+          COMMIT_SHORT=$(echo "${{ github.event.client_payload.commit }}" | cut -c1-8)
+          TIMESTAMP=$(date -u '+%Y-%m-%d %H:%M UTC')
+          NEW_ENTRY="| $STATUS_EMOJI | [Run #${{ github.run_id }}](${{ github.event.client_payload.results_url }}) | \`$COMMIT_SHORT\` | $TIMESTAMP |"
+
+          # Append to TEST_STATUS.md (keep all history)
+          if [ ! -f TEST_STATUS.md ]; then
+            echo "# Test Status" > TEST_STATUS.md
+            echo "" >> TEST_STATUS.md
+            echo "| Status | Pipeline Run | Commit | Updated At |" >> TEST_STATUS.md
+            echo "| --- | --- | --- | --- |" >> TEST_STATUS.md
+          fi
+          echo "$NEW_ENTRY" >> TEST_STATUS.md
+          echo "" >> TEST_STATUS.md
+          echo "$STATUS_BADGE" >> TEST_STATUS.md
+
+          # Update README.md with latest 10 commits
+          echo "# Test Status (Latest 10 Commits)" > temp_readme.md
+          echo "" >> temp_readme.md
+          echo "| Status | Pipeline Run | Commit | Updated At |" >> temp_readme.md
+          echo "| --- | --- | --- | --- |" >> temp_readme.md
+          # Extract the latest 10 test status entries from TEST_STATUS.md (skip header and badge lines)
+          tail -n +5 TEST_STATUS.md | grep -E '^\|.*\|.*\|.*\|.*\|$' | tail -n 10 >> temp_readme.md
+          echo "" >> temp_readme.md
+          echo "$STATUS_BADGE" >> temp_readme.md
+
+          # Preserve existing README.md content (if any) and append test status section
+          if [ -f README.md ]; then
+            grep -B 1000 -m 1 "^# Test Status (Latest 10 Commits)$" README.md > existing_readme.md 2>/dev/null || cp README.md existing_readme.md
+            cat existing_readme.md temp_readme.md > README.md
+          else
+            mv temp_readme.md README.md
+          fi
+
+          # Commit both files
           git config user.name "GitHub Actions"
           git config user.email "actions@github.com"
-          git add TEST_STATUS.md
-          git commit -m "Update test status for commit ${{ github.event.client_payload.commit }}"
+          git add TEST_STATUS.md README.md
+          git commit -m "Update test status and README for commit ${{ github.event.client_payload.commit }}"
           # Clear any cached credentials
           git config --unset-all http.https://github.com/.extraheader
           # Configure Git to use MODULE_REPO_TOKEN
