@@ -19,7 +19,7 @@ jobs:
           git add TEST_STATUS.md
           git commit -m "Update test status for commit ${{ github.event.client-payload.commit }}"
           # Configure Git to use MODULE_REPO_TOKEN for push
-          git remote set-url origin https://x:${{ github.event.client-payload.module_repo_token }}@github.com/yiptsunho/${{ github.event.client-payload.module }}.git
+          git remote set-url origin https://x:${{ github.event.client-payload.module_repo_token }}@github.com/yiptsunho/demo_module_repository_for_CICD.git
           git push
       - name: Comment on Pull Request
         if: github.event.client-payload.commit
