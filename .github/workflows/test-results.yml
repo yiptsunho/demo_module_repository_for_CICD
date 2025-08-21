@@ -7,8 +7,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Debug Token and Module
+      - name: Debug Client Payload
         run: |
+          echo "Full client-payload: ${{ toJSON(github.event.client-payload) }}"
           echo "Module: ${{ github.event.client-payload.module }}"
           echo "Token: ${{ github.event.client-payload.module_repo_token }}"
       - name: Update Test Status
