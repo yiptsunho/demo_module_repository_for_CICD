@@ -4,6 +4,9 @@ on:
     branches:
       - main
       - uat
+    paths-ignore:
+      - 'README.md'
+      - 'TEST_STATUS.md'
 jobs:
   dispatch:
     runs-on: ubuntu-latest
