@@ -30,3 +30,6 @@
 | ✅ Success | [Run #17162958502](https://github.com/yiptsunho/demo_master_repository_for_CICD/actions/runs/17162949199) | `f77f00de` | 2025-08-22 18:23 UTC |
 
 ![Test Status](https://img.shields.io/badge/Test%20Status-Success-green)
+| ❌ Failure | [Run #17165382057](https://github.com/yiptsunho/demo_master_repository_for_CICD/actions/runs/17165373930) | `02112847` | 2025-08-22 20:33 UTC |
+
+![Test Status](https://img.shields.io/badge/Test%20Status-Failure-red)
