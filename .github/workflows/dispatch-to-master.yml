@@ -16,7 +16,7 @@ jobs:
           token: ${{ secrets.MODULE_REPO_TOKEN }}
           repository: yiptsunho/demo_master_repository_for_CICD
           event-type: module-updated
-          client_payload: '{"module":"demo_module_repository_for_CICD","commit":"${{ github.sha }}"}'
+          client-payload: '{"module":"demo_module_repository_for_CICD","commit":"${{ github.sha }}"}'
       - name: Debug Dispatch
         if: failure()
         run: |
