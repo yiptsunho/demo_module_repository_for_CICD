@@ -15,5 +15,6 @@
 | ❌ Failure | [Run #17155542020](https://github.com/yiptsunho/demo_master_repository_for_CICD/actions/runs/17155535474) | `92c9bf63` | 2025-08-22 12:41 UTC |
 | ✅ Success | [Run #17155690367](https://github.com/yiptsunho/demo_master_repository_for_CICD/actions/runs/17155681207) | `92c9bf63` | 2025-08-22 12:47 UTC |
 | ✅ Success | [Run #17156369495](https://github.com/yiptsunho/demo_master_repository_for_CICD/actions/runs/17156360113) | `92c9bf63` | 2025-08-22 13:18 UTC |
+| ❌ Failure | [Run #17156715460](https://github.com/yiptsunho/demo_master_repository_for_CICD/actions/runs/17156709740) | `16e77f70` | 2025-08-22 13:33 UTC |
 
-![Test Status](https://img.shields.io/badge/Test%20Status-Success-green)
+![Test Status](https://img.shields.io/badge/Test%20Status-Failure-red)
