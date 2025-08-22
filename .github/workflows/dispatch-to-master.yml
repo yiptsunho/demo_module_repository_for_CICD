@@ -1,0 +1,23 @@
+name: Dispatch to Master Repository
+on:
+  push:
+    branches:
+      - main
+      - uat
+jobs:
+  dispatch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Module Repository
+        uses: actions/checkout@v4
+      - name: Dispatch Module Updated Event
+        uses: peter-evans/repository-dispatch@v3
+        with:
+          token: ${{ secrets.MODULE_REPO_TOKEN }}
+          repository: yiptsunho/demo_master_repository_for_CICD
+          event-type: module-updated
+          client_payload: '{"module":"demo_module_repository_for_CICD","commit":"${{ github.sha }}"}'
+      - name: Debug Dispatch
+        if: failure()
+        run: |
+          echo "Dispatch failed. Check MODULE_REPO_TOKEN permissions and repository access."
