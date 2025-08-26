@@ -7,9 +7,14 @@ on:
     paths-ignore:
       - 'README.md'
       - 'TEST_STATUS.md'
+      - '.github/workflows/dispatch-to-master.yml'
+      - '.github/workflows/test-results.yml'
 jobs:
   dispatch:
     runs-on: ubuntu-latest
+    env:
+      MASTER_REPO: ${{ secrets.MASTER_REPO }}
+      MODULE_NAME: ${{ secrets.MODULE_NAME }}
     steps:
       - name: Checkout Module Repository
         uses: actions/checkout@v4
@@ -17,9 +22,9 @@ jobs:
         uses: peter-evans/repository-dispatch@v3
         with:
           token: ${{ secrets.MODULE_REPO_TOKEN }}
-          repository: yiptsunho/demo_master_repository_for_CICD
+          repository: ${{ env.MASTER_REPO }}
           event-type: module-updated
-          client-payload: '{"module":"demo_module_repository_for_CICD","commit":"${{ github.sha }}"}'
+          client-payload: '{"module":"${{ env.MODULE_NAME }}","commit":"${{ github.sha }}"}'
       - name: Debug Dispatch
         if: failure()
         run: |

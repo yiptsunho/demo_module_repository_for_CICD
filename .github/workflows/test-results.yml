@@ -14,14 +14,15 @@ jobs:
           STATUS_BADGE=$([[ "${{ github.event.client_payload.test_status }}" == "success" ]] && echo "![Test Status](https://img.shields.io/badge/Test%20Status-Success-green)" || echo "![Test Status](https://img.shields.io/badge/Test%20Status-Failure-red)")
           COMMIT_SHORT=$(echo "${{ github.event.client_payload.commit }}" | cut -c1-8)
           TIMESTAMP=$(date -u '+%Y-%m-%d %H:%M UTC')
-          NEW_ENTRY="| $STATUS_EMOJI | [Run #${{ github.run_id }}](${{ github.event.client_payload.results_url }}) | \`$COMMIT_SHORT\` | $TIMESTAMP |"
+          MODULE="${{ github.event.client_payload.module }}"
+          NEW_ENTRY="| $MODULE | $STATUS_EMOJI | [Run #${{ github.run_id }}](${{ github.event.client_payload.results_url }}) | \`$COMMIT_SHORT\` | $TIMESTAMP |"
 
           # Append to TEST_STATUS.md (keep all history)
           if [ ! -f TEST_STATUS.md ]; then
             echo "# Test Status" > TEST_STATUS.md
             echo "" >> TEST_STATUS.md
-            echo "| Status | Pipeline Run | Commit | Updated At |" >> TEST_STATUS.md
-            echo "| --- | --- | --- | --- |" >> TEST_STATUS.md
+            echo "| Module | Status | Pipeline Run | Commit | Updated At |" >> TEST_STATUS.md
+            echo "|--------|--------|--------------|--------|------------|" >> TEST_STATUS.md
           fi
           echo "$NEW_ENTRY" >> TEST_STATUS.md
           echo "" >> TEST_STATUS.md
@@ -30,14 +31,13 @@ jobs:
           # Update README.md with latest 10 commits
           echo "# Test Status (Latest 10 Commits)" > temp_readme.md
           echo "" >> temp_readme.md
-          echo "| Status | Pipeline Run | Commit | Updated At |" >> temp_readme.md
-          echo "| --- | --- | --- | --- |" >> temp_readme.md
-          # Extract the latest 10 test status entries from TEST_STATUS.md (skip header and badge lines)
-          tail -n +5 TEST_STATUS.md | grep -E '^\|.*\|.*\|.*\|.*\|$' | tail -n 10 >> temp_readme.md
+          echo "| Module | Status | Pipeline Run | Commit | Updated At |" >> temp_readme.md
+          echo "|--------|--------|--------------|--------|------------|" >> temp_readme.md
+          tail -n +5 TEST_STATUS.md | grep -E '^\|.*\|.*\|.*\|.*\|.*\|$' | tail -n 10 >> temp_readme.md
           echo "" >> temp_readme.md
           echo "$STATUS_BADGE" >> temp_readme.md
 
-          # Preserve existing README.md content (if any) and append test status section
+          # Preserve existing README.md content
           if [ -f README.md ]; then
             grep -B 1000 -m 1 "^# Test Status (Latest 10 Commits)$" README.md > existing_readme.md 2>/dev/null || cp README.md existing_readme.md
             cat existing_readme.md temp_readme.md > README.md
@@ -50,10 +50,7 @@ jobs:
           git config user.email "actions@github.com"
           git add TEST_STATUS.md README.md
           git commit -m "Update test status and README for commit ${{ github.event.client_payload.commit }}"
-          # Clear any cached credentials
-          git config --unset-all http.https://github.com/.extraheader
-          # Configure Git to use MODULE_REPO_TOKEN
-          git remote set-url origin https://x:${{ github.event.client_payload.module_repo_token }}@github.com/yiptsunho/demo_module_repository_for_CICD.git
+          git remote set-url origin https://x:${{ github.event.client_payload.module_repo_token }}@github.com/${{ github.event.client_payload.repository }}.git
           git push
       - name: Comment on Pull Request
         if: github.event.client_payload.commit
@@ -62,16 +59,17 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const commit = "${{ github.event.client_payload.commit }}";
+            const repo = "${{ github.event.client_payload.repository }}";
             const { data: pulls } = await github.rest.pulls.list({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
+              owner: repo.split('/')[0],
+              repo: repo.split('/')[1],
               state: 'open'
             });
             const pr = pulls.find(p => p.head.sha === commit);
             if (pr) {
               await github.rest.issues.createComment({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
+                owner: repo.split('/')[0],
+                repo: repo.split('/')[1],
                 issue_number: pr.number,
                 body: `Test Status: ${{ github.event.client_payload.test_status }}\nMain Pipeline Run: ${{ github.event.client_payload.results_url }}`
               });
