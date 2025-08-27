@@ -51,3 +51,6 @@
 | ❌ Failure | [Run #17248171248](https://github.com/yiptsunho/demo_master_repository_for_CICD/actions/runs/17248140933) | `80c1cf90` | 2025-08-26 19:18 UTC |
 
 ![Test Status](https://img.shields.io/badge/Test%20Status-Failure-red)
+| dashboards | ❌ Failure | [Run #17267278961](https://github.com/yiptsunho/demo_master_repository_for_CICD/actions/runs/17267247095) | `9f89edf2` | 2025-08-27 12:53 UTC |
+
+![Test Status](https://img.shields.io/badge/Test%20Status-Failure-red)
