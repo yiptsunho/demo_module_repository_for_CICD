@@ -35,7 +35,7 @@ jobs:
           echo "" >> temp_readme.md
           echo "| Module | Status | Pipeline Run | Commit | Updated At |" >> temp_readme.md
           echo "|--------|--------|--------------|--------|------------|" >> temp_readme.md
-          tail -n +5 TEST_STATUS.md | grep -E '^\|.*\|.*\|.*\|.*\|.*\|$' | sort -r | head -n 10 >> temp_readme.md
+          tail -n +3 TEST_STATUS.md | grep -E '^\|.*\|.*\|.*\|.*\|.*\|$' | sort -r | head -n 10 >> temp_readme.md
           echo "" >> temp_readme.md
           echo "$STATUS_BADGE" >> temp_readme.md
 
