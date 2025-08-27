@@ -2,6 +2,9 @@ name: Test Result Notification
 on:
   repository_dispatch:
     types: [test-results]
+concurrency:
+  group: update-test-status-${{ github.event.client_payload.repository }}
+  cancel-in-progress: true
 jobs:
   update-test-status:
     runs-on: ubuntu-latest
@@ -15,25 +18,23 @@ jobs:
           COMMIT_SHORT=$(echo "${{ github.event.client_payload.commit }}" | cut -c1-8)
           TIMESTAMP=$(date -u '+%Y-%m-%d %H:%M UTC')
           MODULE="${{ github.event.client_payload.module }}"
-          NEW_ENTRY="| $MODULE | $STATUS_EMOJI | [Run #${{ github.run_id }}](${{ github.event.client_payload.results_url }}) | \`$COMMIT_SHORT\` | $TIMESTAMP |"
+          NEW_ENTRY="| $MODULE | $STATUS_EMOJI | \`$COMMIT_SHORT\` | $TIMESTAMP |"
 
-          # Append to TEST_STATUS.md (keep all history)
+          # Append to TEST_STATUS.md (keep all history, no badge)
           if [ ! -f TEST_STATUS.md ]; then
             echo "# Test Status" > TEST_STATUS.md
             echo "" >> TEST_STATUS.md
-            echo "| Module | Status | Pipeline Run | Commit | Updated At |" >> TEST_STATUS.md
-            echo "|--------|--------|--------------|--------|------------|" >> TEST_STATUS.md
+            echo "| Module | Status | Commit | Updated At |" >> TEST_STATUS.md
+            echo "|--------|--------|--------|------------|" >> TEST_STATUS.md
           fi
           echo "$NEW_ENTRY" >> TEST_STATUS.md
-          echo "" >> TEST_STATUS.md
-          echo "$STATUS_BADGE" >> TEST_STATUS.md
 
-          # Update README.md with latest 10 commits
+          # Update README.md with latest 10 commits in descending order
           echo "# Test Status (Latest 10 Commits)" > temp_readme.md
           echo "" >> temp_readme.md
-          echo "| Module | Status | Pipeline Run | Commit | Updated At |" >> temp_readme.md
-          echo "|--------|--------|--------------|--------|------------|" >> temp_readme.md
-          tail -n +5 TEST_STATUS.md | grep -E '^\|.*\|.*\|.*\|.*\|.*\|$' | tail -n 10 >> temp_readme.md
+          echo "| Module | Status | Commit | Updated At |" >> temp_readme.md
+          echo "|--------|--------|--------|------------|" >> temp_readme.md
+          tail -n +5 TEST_STATUS.md | grep -E '^\|.*\|.*\|.*\|.*\|$' | sort -r | head -n 10 >> temp_readme.md
           echo "" >> temp_readme.md
           echo "$STATUS_BADGE" >> temp_readme.md
 
