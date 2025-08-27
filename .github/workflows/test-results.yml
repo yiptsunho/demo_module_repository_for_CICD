@@ -27,6 +27,7 @@ jobs:
             echo "| Module | Status | Pipeline Run | Commit | Updated At |" >> TEST_STATUS.md
             echo "|--------|--------|--------------|--------|------------|" >> TEST_STATUS.md
           fi
+          echo "" >> TEST_STATUS.md
           echo "$NEW_ENTRY" >> TEST_STATUS.md
 
           # Update README.md with latest 10 commits in descending order
@@ -34,7 +35,7 @@ jobs:
           echo "" >> temp_readme.md
           echo "| Module | Status | Pipeline Run | Commit | Updated At |" >> temp_readme.md
           echo "|--------|--------|--------------|--------|------------|" >> temp_readme.md
-          tail -n +5 TEST_STATUS.md | grep -E '^\|.*\|.*\|.*\|.*\|.*\|$' | tail -n 10 >> temp_readme.md
+          tail -n +5 TEST_STATUS.md | grep -E '^\|.*\|.*\|.*\|.*\|.*\|$' | sort -r | head -n 10 >> temp_readme.md
           echo "" >> temp_readme.md
           echo "$STATUS_BADGE" >> temp_readme.md
 
